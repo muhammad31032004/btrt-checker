@@ -1,0 +1,6 @@
+iia_sample/
+btrt_structure.py
+*.pdf
+__pycache__/
+*.pyc
+.streamlit/

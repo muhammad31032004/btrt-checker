@@ -222,7 +222,7 @@ def _validate_header(header: TLVNode, result: ValidationResult):
             result.add_warning(f"Unusual file type: '{ftype}'", line=1, tag='DF807D')
 
 
-def _validate_trailer(trailer: TLVNode, expected_records: int, result: ValidationResult, line: int):
+def _validate_trailer(trailer: TLVNode, expected_records: int, result: ValidationResult, line: int, btrt_types: list = None):
     """Validate file trailer structure."""
     if trailer.tag != 'FF46':
         result.add_error(f"Expected trailer tag FF46, got {trailer.tag}", line=line, tag=trailer.tag)
@@ -238,6 +238,10 @@ def _validate_trailer(trailer: TLVNode, expected_records: int, result: Validatio
     if rec_count_node:
         try:
             declared = int(rec_count_node.value)
+            # BTRT30 and BTRT51 files have declared count off by 1
+            btrt_codes = [c for c, d in (btrt_types or [])]
+            if any(c in ('BTRT30', 'BTRT51') for c in btrt_codes):
+                declared -= 1
             if declared != expected_records:
                 result.add_warning(
                     f"Trailer declares {declared} records but file contains {expected_records}",
@@ -446,7 +450,7 @@ def validate_file(content: str) -> ValidationResult:
     # Validate trailer
     if parsed['trailer']:
         trailer_line = parsed['line_count']
-        _validate_trailer(parsed['trailer'], num_records, result, trailer_line)
+        _validate_trailer(parsed['trailer'], num_records, result, trailer_line, btrt_types)
         ff4a = parsed['trailer'].find_tag('FF4A')
         if ff4a:
             result.stats['declared_records'] = ff4a.get_value('DF807E')

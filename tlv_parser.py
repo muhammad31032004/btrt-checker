@@ -164,17 +164,9 @@ def parse_tlv(data: str, start: int = 0, end: int = None, line: int = 0,
 
         node_start = pos
 
-        # Parse tag and length, skip invalid bytes on error
-        try:
-            tag, pos = parse_tag(data, pos)
-            length, pos = parse_length(data, pos)
-        except ParseError as e:
-            warnings.append({
-                'line': line, 'position': node_start,
-                'message': f"Skipping invalid data at position {node_start}: {e.message}"
-            })
-            pos = node_start + 2
-            continue
+        # Parse tag and length
+        tag, pos = parse_tag(data, pos)
+        length, pos = parse_length(data, pos)
 
         # Check we have enough data — if parent block length is too short,
         # extend boundary and warn instead of failing

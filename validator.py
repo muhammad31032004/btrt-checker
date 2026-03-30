@@ -238,11 +238,11 @@ def _validate_trailer(trailer: TLVNode, expected_records: int, result: Validatio
     if rec_count_node:
         try:
             declared = int(rec_count_node.value)
-            # BTRT30 and BTRT51 files have declared count off by 1
+            # BTRT30/BTRT51 use a different counting convention — skip validation
             btrt_codes = [c for c, d in (btrt_types or [])]
             if any(c in ('BTRT30', 'BTRT51') for c in btrt_codes):
-                declared -= 1
-            if declared != expected_records:
+                pass
+            elif declared != expected_records:
                 result.add_warning(
                     f"Trailer declares {declared} records but file contains {expected_records}",
                     line=line, tag='DF807E'

@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 from tlv_parser import parse_iia_file, TLVNode
 from validator import validate_file, get_tag_name, BTRT_TAG_MAP
 
@@ -16,16 +15,6 @@ uploaded_files = st.file_uploader(
     help="Upload one or more SmartVista application processing interface files to validate"
 )
 
-sample_dir = os.path.join(os.path.dirname(__file__), "iia_sample")
-sample_files = []
-if os.path.isdir(sample_dir):
-    sample_files = sorted(os.listdir(sample_dir))
-
-use_sample = st.checkbox("Or pick from sample files", value=False)
-selected_samples = []
-if use_sample and sample_files:
-    selected_samples = st.multiselect("Sample files", sample_files)
-
 # --- Build file list: (filename, content) ---
 files = []
 
@@ -36,11 +25,6 @@ for uf in uploaded_files:
     except UnicodeDecodeError:
         content = raw.decode('latin-1')
     files.append((uf.name, content))
-
-for sname in selected_samples:
-    filepath = os.path.join(sample_dir, sname)
-    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
-        files.append((sname, f.read()))
 
 if not files:
     st.stop()
